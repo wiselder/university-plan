@@ -1,7 +1,5 @@
 package ru.wiselder.plan.business.lesson;
 
-import java.util.Optional;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,8 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.wiselder.plan.response.GroupLesson;
 import ru.wiselder.plan.model.Lesson;
-import ru.wiselder.plan.request.LessonRequest;
+import ru.wiselder.plan.request.GroupLessonRequest;
 
 @RestController
 @RequestMapping("/lesson")
@@ -21,18 +20,18 @@ public class LessonController {
     private final LessonService lessonService;
 
     @PostMapping
-    public void addLesson(@RequestBody @Valid LessonRequest lesson) {
-        lessonService.addLesson(lesson);
-    }
-
-    @PostMapping(path = "/{id}")
-    public void editLesson(@PathVariable("id") int lessonId, LessonRequest lesson) {
-        lessonService.editLesson(lessonId, lesson);
+    public GroupLesson addLesson(@RequestBody @Valid GroupLessonRequest lesson) {
+        return lessonService.addLesson(lesson);
     }
 
     @GetMapping(path = "/{id}")
-    public Optional<Lesson> editLesson(@PathVariable("id") int lessonId) {
+    public Lesson getLesson(@PathVariable("id") int lessonId) {
         return lessonService.getLesson(lessonId);
+    }
+
+    @PostMapping(path = "/{id}")
+    public GroupLesson editLesson(@PathVariable("id") int lessonId, @RequestBody @Valid  GroupLessonRequest lesson) {
+        return lessonService.editLesson(lessonId, lesson);
     }
 
     @DeleteMapping(path = "/{id}")

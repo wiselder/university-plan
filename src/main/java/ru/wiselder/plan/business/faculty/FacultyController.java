@@ -31,13 +31,13 @@ public class FacultyController {
         return facultyService.getOrCreate(request);
     }
 
-    @GetMapping("/{faculty}/groups")
-    public List<Group> getGroups(@PathVariable("faculty") int faculty) {
+    @GetMapping("/{id}/groups")
+    public List<Group> getGroups(@PathVariable("id") int faculty) {
         return facultyService.getGroups(faculty);
     }
 
-    @PostMapping("/groups")
-    public Group getOrCreate(@RequestBody @Valid GroupRequest request) {
-        return facultyService.getOrCreate(request);
+    @PostMapping("/{id}/groups")
+    public Group getOrCreate(@PathVariable("id") int faculty, @RequestBody @Valid GroupRequest request) {
+        return facultyService.getOrCreate(faculty, request);
     }
 }

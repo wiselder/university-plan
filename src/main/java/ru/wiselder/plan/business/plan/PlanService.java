@@ -1,49 +1,47 @@
 package ru.wiselder.plan.business.plan;
 
-import java.time.DayOfWeek;
-import java.util.List;
-
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.MultiMapUtils;
 import org.springframework.stereotype.Service;
-import ru.wiselder.plan.model.Lesson;
+import org.springframework.transaction.annotation.Transactional;
+import ru.wiselder.plan.response.GroupLesson;
+import ru.wiselder.plan.response.TeacherDayPlan;
+import ru.wiselder.plan.response.TeacherWeekPlan;
 import ru.wiselder.plan.request.GroupDayPlanRequest;
-import ru.wiselder.plan.request.GroupRequest;
+import ru.wiselder.plan.request.GroupWeekPlanRequest;
 import ru.wiselder.plan.request.TeacherDayPlanRequest;
-import ru.wiselder.plan.request.TeacherRequest;
-import ru.wiselder.plan.response.DayPlan;
-import ru.wiselder.plan.response.Plan;
+import ru.wiselder.plan.request.TeacherWeekPlanRequest;
+import ru.wiselder.plan.response.GroupDayPlan;
+import ru.wiselder.plan.response.GroupWeekPlan;
 
 @Service
 @RequiredArgsConstructor
 public class PlanService {
-    private final PlanDao storage;
+    private final PlanDao planDao;
 
-    public Plan getPlan(GroupRequest request) {
-        return toPlan(storage.findLessonsByGroup(request));
+    public GroupDayPlan getPlan(GroupDayPlanRequest request) {
+        return GroupDayPlan.of(request.day(), planDao.findLessons(request));
     }
 
-    public DayPlan getPlan(GroupDayPlanRequest request) {
-        return new DayPlan(storage.findLessonsGroupAndDay(request));
+    public GroupWeekPlan getPlan(GroupWeekPlanRequest request) {
+        return GroupWeekPlan.of(planDao.findLessons(request));
     }
 
-    public Plan getPlan(TeacherRequest request) {
-        return toPlan(storage.findLessonsByTeacher(request));
+    @Transactional
+    public TeacherDayPlan getPlan(TeacherDayPlanRequest request) {
+        var lessons = planDao.findLessons(request)
+                .stream()
+                .map(lesson -> new GroupLesson(lesson, planDao.getGroupsByLesson(lesson.id())))
+                .toList();
+        return TeacherDayPlan.of(request.day(), lessons);
     }
 
-    public DayPlan getPlan(TeacherDayPlanRequest request) {
-        return new DayPlan(storage.findLessonsByTeacherAndDay(request));
+    @Transactional
+    public TeacherWeekPlan getPlan(TeacherWeekPlanRequest request) {
+        var lessons = planDao.findLessons(request)
+                .stream()
+                .map(lesson -> new GroupLesson(lesson, planDao.getGroupsByLesson(lesson.id())))
+                .toList();
+        return TeacherWeekPlan.of(lessons);
     }
 
-    private Plan toPlan(List<Lesson> lessons) {
-        var map = MultiMapUtils.<DayOfWeek, Lesson>newListValuedHashMap();
-        for (var l : lessons) {
-            map.put(l.day(), l);
-        }
-        var list = new DayPlan[7];
-        for (var day: DayOfWeek.values()) {
-            list[day.ordinal()] = new DayPlan(map.get(day));
-        }
-        return new Plan(List.of(list));
-    }
 }
