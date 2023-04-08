@@ -22,17 +22,17 @@ public class AuditoriumController {
     private final AuditoriumService auditoriumService;
 
     @GetMapping
-    public List<Auditorium> getDisciplines(@RequestParam(value = "pattern", required = false) String namePattern) {
+    public List<Auditorium> getAuditoriums(@RequestParam(value = "pattern", required = false) String namePattern) {
         return auditoriumService.getAuditoriumLikeName(namePattern);
-    }
-
-    @GetMapping("/{id}")
-    public Optional<Auditorium> getById(@PathVariable("id") int id) {
-        return auditoriumService.getById(id);
     }
 
     @PostMapping
     public Auditorium getOrCreate(@RequestBody @Valid CreateAuditoriumRequest auditoriumRequest) {
         return auditoriumService.getOrCreate(auditoriumRequest);
+    }
+
+    @GetMapping("/{id}")
+    public Optional<Auditorium> getById(@PathVariable("id") int id) {
+        return auditoriumService.getById(id);
     }
 }

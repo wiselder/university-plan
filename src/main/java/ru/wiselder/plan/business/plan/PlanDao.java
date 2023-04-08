@@ -6,12 +6,14 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.wiselder.plan.business.faculty.FacultyDao;
 import ru.wiselder.plan.business.lesson.LessonDao;
+import ru.wiselder.plan.model.Group;
 import ru.wiselder.plan.model.Lesson;
 import ru.wiselder.plan.request.GroupDayPlanRequest;
-import ru.wiselder.plan.request.GroupRequest;
+import ru.wiselder.plan.request.GroupWeekPlanRequest;
 import ru.wiselder.plan.request.TeacherDayPlanRequest;
-import ru.wiselder.plan.request.TeacherRequest;
+import ru.wiselder.plan.request.TeacherWeekPlanRequest;
 
 @Repository
 @RequiredArgsConstructor
@@ -31,16 +33,18 @@ public class PlanDao {
               AND g.SUB_NUMBER = :subNumber
             """;
     private static final String SELECT_BY_TEACHER = "SELECT * FROM LESSONS l WHERE l.TEACHER_ID = :teacherId";
-    private static final String PREDICATE_BY_WEEK_AND_DAY = """
-              AND l.WEEK_NUMBER = :week
-              AND l.WEEK_DAY = :day
+    private static final String PREDICATE_BY_DAY = " AND l.WEEK_DAY = :day";
+    private static final String SELECT_BY_GROUP_AND_DAY = SELECT_BY_GROUP + PREDICATE_BY_DAY;
+    private static final String SELECT_BY_TEACHER_AND_DAY = SELECT_BY_TEACHER + PREDICATE_BY_DAY;
+    private static final String SELECT_GROUPS_BY_LESSON = """
+            SELECT g.* FROM GROUPS g
+            JOIN GROUPLESSONS gl ON gl.GROUP_ID = g.GROUP_ID
+            WHERE gl.LESSON_ID = :lessonId
             """;
-    private static final String SELECT_BY_GROUP_AND_DAY = SELECT_BY_GROUP + PREDICATE_BY_WEEK_AND_DAY;
-    private static final String SELECT_BY_TEACHER_AND_DAY = SELECT_BY_TEACHER + PREDICATE_BY_WEEK_AND_DAY;
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    public List<Lesson> findLessonsByGroup(GroupRequest request) {
+    public List<Lesson> findLessons(GroupWeekPlanRequest request) {
         return jdbcTemplate.query(SELECT_BY_GROUP, Map.of(
                 "faculty", request.faculty(),
                 "course", request.course(),
@@ -49,26 +53,28 @@ public class PlanDao {
         ), LessonDao.MAPPER);
     }
 
-    public List<Lesson> findLessonsGroupAndDay(GroupDayPlanRequest request) {
+    public List<Lesson> findLessons(GroupDayPlanRequest request) {
         return jdbcTemplate.query(SELECT_BY_GROUP_AND_DAY, Map.of(
                 "faculty", request.group().faculty(),
                 "course", request.group().course(),
                 "number", request.group().number(),
                 "subNumber", request.group().subNumber(),
-                "week", request.week().getValue(),
                 "day", request.day().getValue()
         ), LessonDao.MAPPER);
     }
 
-    public List<Lesson> findLessonsByTeacher(TeacherRequest request) {
+    public List<Lesson> findLessons(TeacherWeekPlanRequest request) {
         return jdbcTemplate.query(SELECT_BY_TEACHER, Map.of("teacherId", request.id()), LessonDao.MAPPER);
     }
 
-    public List<Lesson> findLessonsByTeacherAndDay(TeacherDayPlanRequest request) {
+    public List<Lesson> findLessons(TeacherDayPlanRequest request) {
         return jdbcTemplate.query(SELECT_BY_TEACHER_AND_DAY, Map.of(
                 "teacherId", request.teacherId(),
-                "week", request.week().getValue(),
                 "day", request.day().getValue()
         ), LessonDao.MAPPER);
+    }
+
+    public List<Group> getGroupsByLesson(int id) {
+        return jdbcTemplate.query(SELECT_GROUPS_BY_LESSON, Map.of("lessonId", id), FacultyDao.GROUP_MAPPER);
     }
 }

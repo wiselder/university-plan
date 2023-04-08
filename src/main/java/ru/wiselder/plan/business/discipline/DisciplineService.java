@@ -1,6 +1,7 @@
 package ru.wiselder.plan.business.discipline;
 
 import java.util.List;
+import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,5 +27,9 @@ public class DisciplineService {
             discipline = disciplineDao.findByName(request.name());
         }
         return discipline.orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR));
+    }
+
+    public Optional<Discipline> getById(int id) {
+        return disciplineDao.findById(id);
     }
 }

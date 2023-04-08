@@ -8,13 +8,13 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.stereotype.Repository;
 import ru.wiselder.plan.model.Auditorium;
 import ru.wiselder.plan.model.Bell;
 import ru.wiselder.plan.model.Discipline;
 import ru.wiselder.plan.model.Lesson;
 import ru.wiselder.plan.model.Teacher;
-import ru.wiselder.plan.model.Week;
 import ru.wiselder.plan.model.LessonInfo;
 import ru.wiselder.plan.utils.SqlUtils;
 
@@ -35,7 +35,7 @@ public class LessonDao {
     private static final String SELECT_BY_ID = SELECT_BASE + " WHERE l.LESSON_ID = :id";
 
     private static final String LESSON_TIME_PREDICATE = """
-            WHERE l.BELL_ID = :bell AND l.WEEK_DAY = :day AND l.WEEK_NUMBER = :week
+            WHERE l.BELL_ID = :bell AND l.WEEK_DAY = :day
             """;
     private static final String SELECT_LESSON_BY_TIME = SELECT_BASE + LESSON_TIME_PREDICATE;
     private static final String SELECT_LESSON_INTERSECTIONS_A = SELECT_LESSON_BY_TIME + """
@@ -48,21 +48,20 @@ public class LessonDao {
             JOIN GROUPLESSONS gl ON gl.LESSON_ID = l.LESSON_ID AND gl.GROUP_ID IN (:groupIds)
             """ + LESSON_TIME_PREDICATE;
     private static final String INSERT_LESSON = """
-            INSERT INTO LESSONS (DISCIPLINE_ID, AUDITORIUM_ID, TEACHER_ID, WEEK_NUMBER, WEEK_DAY, BELL_ID)
-            VALUES (:disciplineId, :auditoriumId, :teacherId, :week, :day, :bell)
+            INSERT INTO LESSONS (DISCIPLINE_ID, AUDITORIUM_ID, TEACHER_ID, WEEK_DAY, BELL_ID)
+            VALUES (:disciplineId, :auditoriumId, :teacherId, :day, :bell)
             """;
     private static final String UPDATE_LESSON = """
             UPDATE LESSONS SET
                 DISCIPLINE_ID = :disciplineId,
                 AUDITORIUM_ID = :auditoriumId,
                 TEACHER_ID = :teacherId,
-                WEEK_NUMBER = :week,
                 WEEK_DAY = :day,
                 BELL_ID = :bell
             WHERE LESSON_ID = :id
             """;
-    private static final String DELETE_LESSON_GROUPS = "DELETE FROM GROUPLESSONS WHERE LESSON_ID = :lessonId";
-    private static final String REFRESH_GROUPS = """
+    private static final String DELETE_GROUPS_FROM_LESSON = "DELETE FROM GROUPLESSONS WHERE LESSON_ID = :lessonId";
+    private static final String INSERT_GROUPS_TO_LESSON = """
             INSERT INTO GROUPLESSONS (LESSON_ID, GROUP_ID) VALUES (:lessonId, :groupId)
             """;
     public static final RowMapper<Lesson> MAPPER = (rs, rowNum) -> new Lesson(
@@ -77,7 +76,6 @@ public class LessonDao {
                     rs.getString("ADDRESS")
             ),
             new Teacher(rs.getInt("TEACHERS.TEACHER_ID"), rs.getString("FULL_NAME")),
-            Week.of(rs.getInt("WEEK_NUMBER")),
             DayOfWeek.of(rs.getInt("WEEK_DAY")),
             new Bell(
                     rs.getInt("ORDINAL_ID"),
@@ -88,29 +86,26 @@ public class LessonDao {
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
 
-    public Optional<Lesson> getLessonByAuditorium(int bell, DayOfWeek day, Week week, int auditoriumId) {
+    public Optional<Lesson> getLessonByAuditorium(int bell, DayOfWeek day,  int auditoriumId) {
         return jdbcTemplate.query(SELECT_LESSON_INTERSECTIONS_A, Map.of(
                 "bell", bell,
                 "day", day.getValue(),
-                "week", week.getValue(),
                 "auditoriumId", auditoriumId
         ), SqlUtils.singleExtractor(MAPPER));
     }
 
-    public Optional<Lesson> getLessonByTeacher(int bell, DayOfWeek day, Week week, int teacherId) {
+    public Optional<Lesson> getLessonByTeacher(int bell, DayOfWeek day,  int teacherId) {
         return jdbcTemplate.query(SELECT_LESSON_INTERSECTIONS_T, Map.of(
                 "bell", bell,
                 "day", day.getValue(),
-                "week", week.getValue(),
                 "teacherId", teacherId
         ), SqlUtils.singleExtractor(MAPPER));
     }
 
-    public Optional<Lesson> getLessonByGroups(int bell, DayOfWeek day, Week week, Set<Integer> groupIds) {
+    public Optional<Lesson> getLessonByGroups(int bell, DayOfWeek day,  Set<Integer> groupIds) {
         return jdbcTemplate.query(SELECT_LESSON_INTERSECTIONS_G, Map.of(
                 "bell", bell,
                 "day", day.getValue(),
-                "week", week.getValue(),
                 "groupIds", groupIds
         ), SqlUtils.singleExtractor(MAPPER));
     }
@@ -121,36 +116,35 @@ public class LessonDao {
                 "auditoriumId", lesson.auditoriumId(),
                 "teacherId", lesson.teacherId(),
                 "bell", lesson.bellOrdinal(),
-                "day", lesson.day().getValue(),
-                "week", lesson.week().getValue()
+                "day", lesson.day().getValue()
         ));
     }
 
-    public void editLesson(int lessonId, LessonInfo lesson) {
+    public void updateLesson(int lessonId, LessonInfo lesson) {
         jdbcTemplate.update(UPDATE_LESSON, Map.of(
                 "id", lessonId,
                 "disciplineId", lesson.disciplineId(),
                 "auditoriumId", lesson.auditoriumId(),
                 "teacherId", lesson.teacherId(),
                 "bell", lesson.bellOrdinal(),
-                "day", lesson.day().getValue(),
-                "week", lesson.week().getValue()
+                "day", lesson.day().getValue()
         ));
     }
-    public void editGroups(int lessonId, Set<Integer> groupIds) {
-        jdbcTemplate.update(DELETE_LESSON_GROUPS, Map.of(
+    public void resetGroups(int lessonId, Set<Integer> groupIds) {
+        jdbcTemplate.update(DELETE_GROUPS_FROM_LESSON, Map.of(
                 "lessonId", lessonId
         ));
-        for (var groupId : groupIds) {
-            jdbcTemplate.update(REFRESH_GROUPS, Map.of(
-                    "lessonId", lessonId,
-                    "groupId", groupId
-            ));
-        }
+
+        var batch = SqlParameterSourceUtils.createBatch(
+                groupIds.stream()
+                        .map(groupId -> Map.of("lessonId", lessonId, "groupId", groupId))
+                        .toList()
+        );
+        jdbcTemplate.batchUpdate(INSERT_GROUPS_TO_LESSON, batch);
     }
 
-    public void removeLesson(int lessonId) {
-        jdbcTemplate.update(REMOVE_LESSON, Map.of("id", lessonId));
+    public int removeLesson(int lessonId) {
+        return jdbcTemplate.update(REMOVE_LESSON, Map.of("id", lessonId));
     }
 
     public Optional<Lesson> getLessonById(int id) {

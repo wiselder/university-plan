@@ -36,13 +36,13 @@ public class FacultyService {
     }
 
     @Transactional
-    public Group getOrCreate(GroupRequest request) {
-        var faculty = facultyDao.findById(request.faculty());
-        faculty.orElseThrow(() -> new ObjectNotFoundException("faculty", request.faculty()));
-        var group = facultyDao.findGroup(request);
+    public Group getOrCreate(int facultyId, GroupRequest request) {
+        var faculty = facultyDao.findById(facultyId);
+        faculty.orElseThrow(() -> new ObjectNotFoundException("faculty", facultyId));
+        var group = facultyDao.findGroup(facultyId, request);
         if (group.isEmpty()) {
-            facultyDao.createGroup(request);
-            group = facultyDao.findGroup(request);
+            facultyDao.createGroup(facultyId, request);
+            group = facultyDao.findGroup(facultyId, request);
         }
 
         return group.orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR));
