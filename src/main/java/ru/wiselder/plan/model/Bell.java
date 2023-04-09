@@ -1,6 +1,6 @@
 package ru.wiselder.plan.model;
 
-import java.time.Instant;
+import java.time.LocalTime;
 
-public record Bell(int ordinal, Instant start, Instant finish) {
+public record Bell(int ordinal, LocalTime start, LocalTime finish) {
 }

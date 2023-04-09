@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.wiselder.plan.business.faculty.FacultyDao;
 import ru.wiselder.plan.business.lesson.LessonDao;
+import ru.wiselder.plan.model.Bell;
 import ru.wiselder.plan.model.Group;
 import ru.wiselder.plan.model.Lesson;
 import ru.wiselder.plan.request.GroupDayPlanRequest;
@@ -41,6 +43,12 @@ public class PlanDao {
             JOIN GROUPLESSONS gl ON gl.GROUP_ID = g.GROUP_ID
             WHERE gl.LESSON_ID = :lessonId
             """;
+    private static final RowMapper<Bell> BELL_MAPPER = (rs, rn) -> new Bell(
+            rs.getInt("BELL_ORDINAL"),
+            rs.getTime("START").toLocalTime(),
+            rs.getTime("FINISH").toLocalTime()
+    );
+    private static final String SELECT_BELLS = "SELECT * FROM BELLS ORDER BY START DESC";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -64,7 +72,7 @@ public class PlanDao {
     }
 
     public List<Lesson> findLessons(TeacherWeekPlanRequest request) {
-        return jdbcTemplate.query(SELECT_BY_TEACHER, Map.of("teacherId", request.id()), LessonDao.MAPPER);
+        return jdbcTemplate.query(SELECT_BY_TEACHER, Map.of("teacherId", request.teacherId()), LessonDao.MAPPER);
     }
 
     public List<Lesson> findLessons(TeacherDayPlanRequest request) {
@@ -76,5 +84,9 @@ public class PlanDao {
 
     public List<Group> getGroupsByLesson(int id) {
         return jdbcTemplate.query(SELECT_GROUPS_BY_LESSON, Map.of("lessonId", id), FacultyDao.GROUP_MAPPER);
+    }
+
+    public List<Bell> findAllBells() {
+        return jdbcTemplate.query(SELECT_BELLS, BELL_MAPPER);
     }
 }

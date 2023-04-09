@@ -79,8 +79,8 @@ public class LessonDao {
             DayOfWeek.of(rs.getInt("WEEK_DAY")),
             new Bell(
                     rs.getInt("ORDINAL_ID"),
-                    rs.getTimestamp("START").toInstant(),
-                    rs.getTimestamp("FINISH").toInstant()
+                    rs.getTime("START").toLocalTime(),
+                    rs.getTime("FINISH").toLocalTime()
             )
     );
     private final NamedParameterJdbcTemplate jdbcTemplate;
