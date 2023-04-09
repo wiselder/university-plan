@@ -44,7 +44,7 @@ public class PlanDao {
             WHERE gl.LESSON_ID = :lessonId
             """;
     private static final RowMapper<Bell> BELL_MAPPER = (rs, rn) -> new Bell(
-            rs.getInt("BELL_ORDINAL"),
+            rs.getInt("ORDINAL_ID"),
             rs.getTime("START").toLocalTime(),
             rs.getTime("FINISH").toLocalTime()
     );
