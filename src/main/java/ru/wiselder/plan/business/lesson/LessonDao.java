@@ -75,7 +75,7 @@ public class LessonDao {
                     rs.getString("AUDITORIUMS.NAME"),
                     rs.getString("ADDRESS")
             ),
-            new Teacher(rs.getInt("TEACHERS.TEACHER_ID"), rs.getString("FULL_NAME")),
+            new Teacher(rs.getInt("TEACHERS.TEACHER_ID"), rs.getString("NAME")),
             DayOfWeek.of(rs.getInt("WEEK_DAY")),
             new Bell(
                     rs.getInt("ORDINAL_ID"),

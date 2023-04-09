@@ -21,7 +21,7 @@ public class TeacherDao {
     private final String SELECT_LIKE_NAME = "SELECT * FROM TEACHERS WHERE NAME LIKE :name";
     private final String SELECT_BY_NAME = "SELECT * FROM TEACHERS WHERE NAME = :name";
     private final String SELECT_BY_ID = "SELECT * FROM TEACHERS WHERE TEACHER_ID = :id";
-    private final String INSERT_QUERY = "INSERT INTO TEACHERS (FULL_NAME) VALUES (:name)";
+    private final String INSERT_QUERY = "INSERT INTO TEACHERS (NAME) VALUES (:name)";
     private final RowMapper<Teacher> MAPPER = (rs, rowNum) -> new Teacher(
             rs.getInt("TEACHER_ID"),
             rs.getString("NAME")
