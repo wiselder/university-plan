@@ -2,7 +2,11 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.0.3'
     id 'io.spring.dependency-management' version '1.1.0'
+    id 'war'
 }
+apply plugin: "java"
+apply plugin: "org.springframework.boot"
+apply plugin: "io.spring.dependency-management"
 
 group = 'ru.wiselder'
 version = '0.0.1-SNAPSHOT'
@@ -20,9 +24,11 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.0.3'
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:3.0.3"
+    implementation 'org.springframework.boot:spring-boot-starter-validation:3.0.3'
+
+    runtimeOnly 'org.springframework.boot:spring-boot-starter-tomcat:3.0.3'
 
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0"
     implementation 'org.liquibase:liquibase-core'
@@ -33,6 +39,15 @@ dependencies {
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+}
+
+bootJar {
+    enabled(false)
+    mainClass = 'ru.wiselder.plan.PlanApplication'
+}
+
+jar {
+    enabled(true)
 }
 
 tasks.named('test') {
