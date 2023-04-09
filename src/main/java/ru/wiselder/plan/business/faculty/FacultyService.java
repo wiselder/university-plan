@@ -21,7 +21,10 @@ public class FacultyService {
         return facultyDao.findAll();
     }
 
+    @Transactional
     public List<Group> getGroups(int faculty) {
+        facultyDao.findById(faculty)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return facultyDao.findGroupsByFaculty(faculty);
     }
 
