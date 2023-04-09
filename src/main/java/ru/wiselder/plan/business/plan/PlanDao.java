@@ -48,7 +48,7 @@ public class PlanDao {
             rs.getTime("START").toLocalTime(),
             rs.getTime("FINISH").toLocalTime()
     );
-    private static final String SELECT_BELLS = "SELECT * FROM BELLS ORDER BY START DESC";
+    private static final String SELECT_BELLS = "SELECT * FROM BELLS ORDER BY START";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
