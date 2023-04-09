@@ -131,9 +131,7 @@ public class LessonDao {
         ));
     }
     public void resetGroups(int lessonId, Set<Integer> groupIds) {
-        jdbcTemplate.update(DELETE_GROUPS_FROM_LESSON, Map.of(
-                "lessonId", lessonId
-        ));
+        jdbcTemplate.update(DELETE_GROUPS_FROM_LESSON, Map.of("lessonId", lessonId));
 
         var batch = SqlParameterSourceUtils.createBatch(
                 groupIds.stream()
@@ -144,6 +142,7 @@ public class LessonDao {
     }
 
     public int removeLesson(int lessonId) {
+        jdbcTemplate.update(DELETE_GROUPS_FROM_LESSON, Map.of("lessonId", lessonId));
         return jdbcTemplate.update(REMOVE_LESSON, Map.of("id", lessonId));
     }
 

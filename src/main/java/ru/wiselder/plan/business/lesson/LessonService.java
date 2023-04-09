@@ -67,8 +67,9 @@ public class LessonService {
         return new GroupLesson(edited, groups);
     }
 
+    @Transactional
     public void removeLesson(int lessonId) {
-       if (storage.removeLesson(lessonId) == 0) {
+        if (storage.removeLesson(lessonId) == 0) {
            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
        }
     }
