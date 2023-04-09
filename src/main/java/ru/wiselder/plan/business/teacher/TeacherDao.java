@@ -31,7 +31,7 @@ public class TeacherDao {
 
     public List<Teacher> findLikeName(String name) {
         return StringUtils.isBlank(name) ?
-                jdbcTemplate.query(SELECT_BASE + ORDER_BY_NAME, Map.of("name", name), MAPPER) :
+                jdbcTemplate.query(SELECT_BASE + ORDER_BY_NAME, MAPPER) :
                 jdbcTemplate.query(SELECT_LIKE_NAME + ORDER_BY_NAME, SqlUtils.nameLike(name), MAPPER);
     }
 

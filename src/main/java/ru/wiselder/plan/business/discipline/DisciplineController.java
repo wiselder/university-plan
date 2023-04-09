@@ -23,7 +23,9 @@ public class DisciplineController {
     private final DisciplineService disciplineService;
 
     @GetMapping
-    public List<Discipline> getDisciplines(@RequestParam(value = "pattern", required = false) String namePattern) {
+    public List<Discipline> getDisciplines(
+            @RequestParam(value = "pattern", required = false, defaultValue = "") String namePattern
+    ) {
         return disciplineService.getDisciplineLikeName(namePattern);
     }
 

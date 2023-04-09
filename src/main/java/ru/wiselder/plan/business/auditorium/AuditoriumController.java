@@ -23,7 +23,9 @@ public class AuditoriumController {
     private final AuditoriumService auditoriumService;
 
     @GetMapping
-    public List<Auditorium> getAuditoriums(@RequestParam(value = "pattern", required = false) String namePattern) {
+    public List<Auditorium> getAuditoriums(
+            @RequestParam(value = "pattern", required = false, defaultValue = "") String namePattern
+    ) {
         return auditoriumService.getAuditoriumLikeName(namePattern);
     }
 

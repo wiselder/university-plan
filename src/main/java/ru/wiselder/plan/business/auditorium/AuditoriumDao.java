@@ -32,10 +32,10 @@ public class AuditoriumDao {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    public List<Auditorium> findLikeName(String start) {
-        return StringUtils.isBlank(start) ?
+    public List<Auditorium> findLikeName(String name) {
+        return StringUtils.isBlank(name) ?
                 jdbcTemplate.query(BASE_SELECT + ORDER_BY_NAME_ADDRESS, MAPPER) :
-                jdbcTemplate.query(SELECT_LIKE_NAME + ORDER_BY_NAME_ADDRESS, nameLike(start), MAPPER);
+                jdbcTemplate.query(SELECT_LIKE_NAME + ORDER_BY_NAME_ADDRESS, nameLike(name), MAPPER);
     }
 
     public Optional<Auditorium> findById(int id) {

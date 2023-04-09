@@ -23,7 +23,9 @@ public class TeacherController {
     private final TeacherService teacherService;
 
     @GetMapping
-    public List<Teacher> getTeachers(@RequestParam(value = "pattern", required = false) String namePattern) {
+    public List<Teacher> getTeachers(
+            @RequestParam(value = "pattern", required = false, defaultValue = "") String namePattern
+    ) {
         return teacherService.getTeacherLikeName(namePattern);
     }
 
