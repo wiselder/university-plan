@@ -5,11 +5,12 @@ import java.util.Set;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
-public record GroupLessonRequest(@NotNull Integer disciplineId,
-                                 @NotNull Integer auditoriumId,
-                                 @NotNull Integer teacherId,
+public record GroupLessonRequest(@NotNull @PositiveOrZero Integer disciplineId,
+                                 @NotNull @PositiveOrZero Integer auditoriumId,
+                                 @NotNull @PositiveOrZero Integer teacherId,
                                  @NotNull DayOfWeek day,
-                                 @NotNull Integer bellOrdinal,
+                                 @NotNull @PositiveOrZero Integer bellOrdinal,
                                  @NotEmpty Set<Integer> groupIds) {
 }
