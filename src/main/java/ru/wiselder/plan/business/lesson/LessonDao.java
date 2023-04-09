@@ -1,6 +1,7 @@
 package ru.wiselder.plan.business.lesson;
 
 import java.time.DayOfWeek;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -102,12 +103,12 @@ public class LessonDao {
         ), SqlUtils.singleExtractor(MAPPER));
     }
 
-    public Optional<Lesson> getLessonByGroups(int bell, DayOfWeek day,  Set<Integer> groupIds) {
+    public List<Lesson> getLessonByGroups(int bell, DayOfWeek day, Set<Integer> groupIds) {
         return jdbcTemplate.query(SELECT_LESSON_INTERSECTIONS_G, Map.of(
                 "bell", bell,
                 "day", day.getValue(),
                 "groupIds", groupIds
-        ), SqlUtils.singleExtractor(MAPPER));
+        ), MAPPER);
     }
 
     public void createLesson(LessonInfo lesson) {

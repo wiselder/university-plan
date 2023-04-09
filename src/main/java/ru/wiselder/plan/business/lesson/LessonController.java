@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.wiselder.plan.response.GroupLesson;
-import ru.wiselder.plan.model.Lesson;
 import ru.wiselder.plan.request.GroupLessonRequest;
 
 @RestController
@@ -25,7 +24,7 @@ public class LessonController {
     }
 
     @GetMapping(path = "/{id}")
-    public Lesson getLesson(@PathVariable("id") int lessonId) {
+    public GroupLesson getLesson(@PathVariable("id") int lessonId) {
         return lessonService.getLesson(lessonId);
     }
 
