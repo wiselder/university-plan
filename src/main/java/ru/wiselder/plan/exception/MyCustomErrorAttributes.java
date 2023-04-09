@@ -17,6 +17,7 @@ public class MyCustomErrorAttributes extends DefaultErrorAttributes {
         if (error instanceof ObjectNotFoundException e) {
             errorAttributes.put("entity", e.entity);
         } else if (error instanceof LessonIntersectionException e) {
+            errorAttributes.put("collision_type", e.type);
             errorAttributes.put("collision_lesson", e.lesson);
         }
         return errorAttributes;
