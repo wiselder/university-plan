@@ -20,7 +20,7 @@ import ru.wiselder.plan.request.TeacherWeekPlanRequest;
 @Repository
 @RequiredArgsConstructor
 public class PlanDao {
-    private static final String SELECT_BY_GROUP = """
+    private static final String SELECT_BASE = """
             SELECT l.*, t.*, a.*, d.*, b.*
             FROM GROUPS g
             JOIN GROUPLESSONS gl ON g.GROUP_ID = gl.GROUP_ID
@@ -29,12 +29,15 @@ public class PlanDao {
             JOIN AUDITORIUMS a ON l.AUDITORIUM_ID = a.AUDITORIUM_ID
             JOIN DISCIPLINES d ON l.DISCIPLINE_ID = d.DISCIPLINE_ID
             JOIN BELLS b ON l.BELL_ID = b.ORDINAL_ID
+            """;
+    private static final String SELECT_BY_GROUP = SELECT_BASE + """
             WHERE g.FACULTY_ID = :faculty
               AND g.COURSE = :course
               AND g.NUMBER = :number
               AND g.SUB_NUMBER = :subNumber
             """;
-    private static final String SELECT_BY_TEACHER = "SELECT * FROM LESSONS l WHERE l.TEACHER_ID = :teacherId";
+    private static final String SELECT_BY_TEACHER =
+            SELECT_BASE + " WHERE l.TEACHER_ID = :teacherId GROUP BY l.LESSON_ID";
     private static final String PREDICATE_BY_DAY = " AND l.WEEK_DAY = :day";
     private static final String SELECT_BY_GROUP_AND_DAY = SELECT_BY_GROUP + PREDICATE_BY_DAY;
     private static final String SELECT_BY_TEACHER_AND_DAY = SELECT_BY_TEACHER + PREDICATE_BY_DAY;

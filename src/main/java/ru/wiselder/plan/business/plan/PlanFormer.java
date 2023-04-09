@@ -56,6 +56,7 @@ public class PlanFormer {
 
     private DayPlan form(DayOfWeek day, SortedBells sortedBells, List<GroupLesson> lessons) {
         var lessonByBell = lessons.stream()
+                .filter(gl -> gl.lesson().day() == day)
                 .collect(Collectors.toMap(o -> o.lesson().bell().start(), Function.identity()));
 
         var result = new ArrayList<GroupLesson>(sortedBells.bells.size());
